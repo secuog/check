@@ -1,11 +1,11 @@
 import argparse
-import re
 import socket
 import threading
-import requests
 import scapy.all
 from scapy.layers.inet import ICMP, IP
 import time
+import requests
+import re
 
 # 文件路径
 path = ''
@@ -58,6 +58,18 @@ def ip1(param):
     ip = socket.gethostbyname(param)
     print(ip)
 
+def domain(param):
+    url1 = "https://site.ip138.com/" + param
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"}
+    res = requests.get(url1, headers=headers)  # 发送get请求
+    pattern1 = r'^<li><span class="date">.*</li>'
+    pattern = r'<span class="date">(.*?)</span><a href="(.*?)"'
+    matches = re.findall(pattern, res.text, re.MULTILINE)
+    for item in matches:
+        date = item[0]
+        url2 = item[1]
+        print(date, url2)
 
 
 
@@ -69,6 +81,7 @@ if __name__ == "__main__":
     parser.add_argument("-a", action="store_true", help="调用微步")
     parser.add_argument("-d", action="store_true", help="目标开放端口探测")
     parser.add_argument("-f", action="store_true", help="根据域名获取IP")
+    parser.add_argument("-g", action="store_true", help="根据IP获取域名")
     args = parser.parse_args()
     if args.s:
         icmpscan(args.param)
@@ -79,3 +92,5 @@ if __name__ == "__main__":
             threading.Thread(target=socket_port, args=(args.param, i)).start()
     elif args.f:
         ip1(args.param)
+    elif args.g:
+        domain(args.param)
